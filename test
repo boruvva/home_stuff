@@ -1,3 +1,22 @@
+import org.junit.jupiter.api.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class MainTest {
+    @Test
+    void testUpdateDates() {
+        String jsonString = "{...}";  // Your test JSON string here
+        JSONObject jsonObject = new JSONObject(jsonString);
+
+        String referenceDateStr = jsonObject.getJSONObject("expiryPayment").getString("barrierStartDate");
+        LocalDate referenceDate = LocalDate.parse(referenceDateStr);
+
+        Main.updateDates(jsonObject, referenceDate);
+
+        // Add your assertions here based on your test JSON data
+    }
+}
+
 import org.json.*;
 import org.junit.*;
 import org.mockito.*;
