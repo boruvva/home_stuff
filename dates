@@ -1,68 +1,48 @@
 import org.json.*;
 import java.time.*;
-import java.time.format.*;
 import java.time.temporal.*;
-import java.io.*;
+import java.nio.file.*;
 
-public class DateFinder {
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
+public class Main {
     public static void main(String[] args) {
-        String jsonStr = readJsonFile("path_to_your_json_file");
-        JSONObject jsonObj = new JSONObject(jsonStr);
-        String referenceDateString = jsonObj.getJSONObject("expiryPayment").getString("barrierStartDate");
-        LocalDate referenceDate = LocalDate.parse(referenceDateString, formatter);
-        JSONObject result = new JSONObject();
-        findDates(jsonObj, result, referenceDate);
-        writeJsonFile("path_to_output_json_file", result.toString());
+        String jsonString = readJsonFile("path_to_your_file.json");  // Replace with your file path
+        JSONObject jsonObject = new JSONObject(jsonString);
+
+        String referenceDateStr = jsonObject.getJSONObject("expiryPayment").getString("barrierStartDate");
+        LocalDate referenceDate = LocalDate.parse(referenceDateStr);
+
+        updateDates(jsonObject, referenceDate);
+
+        System.out.println(jsonObject.toString(4));  // Print the updated JSON
     }
 
-    private static void findDates(JSONObject jsonObj, JSONObject result, LocalDate referenceDate) {
-        for(String key : jsonObj.keySet()) {
-            Object value = jsonObj.get(key);
-            if(value instanceof JSONObject) {
-                JSONObject newResult = new JSONObject();
-                result.put(key, newResult);
-                findDates((JSONObject) value, newResult, referenceDate);
-            } else if(value instanceof JSONArray) {
-                JSONArray array = (JSONArray) value;
-                for(int i = 0; i < array.length(); i++) {
-                    if(array.get(i) instanceof JSONObject) {
-                        JSONObject newResult = new JSONObject();
-                        result.getJSONArray(key).put(newResult);
-                        findDates(array.getJSONObject(i), newResult, referenceDate);
-                    }
-                }
-            } else {
-                try {
-                    LocalDate date = LocalDate.parse(value.toString(), formatter);
-                    long diff = ChronoUnit.DAYS.between(referenceDate, date);
-                    result.put(key, diff);
-                } catch(DateTimeParseException e) {
-                    // Not a date
-                }
-            }
-        }
-    }
-
-    private static String readJsonFile(String filename) {
-        StringBuilder jsonStr = new StringBuilder();
-        try(BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            String line;
-            while((line = br.readLine()) != null) {
-                jsonStr.append(line);
-            }
-        } catch(IOException e) {
+    private static String readJsonFile(String filePath) {
+        String content = "";
+        try {
+            content = new String(Files.readAllBytes(Paths.get(filePath)));
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return jsonStr.toString();
+        return content;
     }
 
-    private static void writeJsonFile(String filename, String jsonStr) {
-        try(BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
-            bw.write(jsonStr);
-        } catch(IOException e) {
-            e.printStackTrace();
+    private static void updateDates(Object obj, LocalDate referenceDate) {
+        if (obj instanceof JSONObject) {
+            JSONObject jsonObject = (JSONObject) obj;
+            for (String key : jsonObject.keySet()) {
+                if (key.toLowerCase().contains("date") && jsonObject.get(key) instanceof String) {
+                    LocalDate date = LocalDate.parse(jsonObject.getString(key));
+                    long difference = ChronoUnit.DAYS.between(referenceDate, date);
+                    jsonObject.put(key, difference);
+                } else {
+                    updateDates(jsonObject.get(key), referenceDate);
+                }
+            }
+        } else if (obj instanceof JSONArray) {
+            JSONArray jsonArray = (JSONArray) obj;
+            for (int i = 0; i < jsonArray.length(); i++) {
+                updateDates(jsonArray.get(i), referenceDate);
+            }
         }
     }
 }
