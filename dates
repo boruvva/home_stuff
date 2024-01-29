@@ -6,30 +6,31 @@ import java.io.*;
 
 public class DateFinder {
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static LocalDate referenceDate = LocalDate.parse("2024-01-29", formatter);
 
     public static void main(String[] args) {
         String jsonStr = readJsonFile("path_to_your_json_file");
         JSONObject jsonObj = new JSONObject(jsonStr);
+        String referenceDateString = jsonObj.getJSONObject("expiryPayment").getString("barrierStartDate");
+        LocalDate referenceDate = LocalDate.parse(referenceDateString, formatter);
         JSONObject result = new JSONObject();
-        findDates(jsonObj, result);
+        findDates(jsonObj, result, referenceDate);
         writeJsonFile("path_to_output_json_file", result.toString());
     }
 
-    private static void findDates(JSONObject jsonObj, JSONObject result) {
+    private static void findDates(JSONObject jsonObj, JSONObject result, LocalDate referenceDate) {
         for(String key : jsonObj.keySet()) {
             Object value = jsonObj.get(key);
             if(value instanceof JSONObject) {
                 JSONObject newResult = new JSONObject();
                 result.put(key, newResult);
-                findDates((JSONObject) value, newResult);
+                findDates((JSONObject) value, newResult, referenceDate);
             } else if(value instanceof JSONArray) {
                 JSONArray array = (JSONArray) value;
                 for(int i = 0; i < array.length(); i++) {
                     if(array.get(i) instanceof JSONObject) {
                         JSONObject newResult = new JSONObject();
                         result.getJSONArray(key).put(newResult);
-                        findDates(array.getJSONObject(i), newResult);
+                        findDates(array.getJSONObject(i), newResult, referenceDate);
                     }
                 }
             } else {
