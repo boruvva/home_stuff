@@ -1,0 +1,25 @@
+import org.json.*;
+import org.junit.*;
+import org.mockito.*;
+import java.time.*;
+import java.time.format.*;
+import java.io.*;
+
+public class DateFinderTest {
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static LocalDate referenceDate = LocalDate.parse("2024-01-29", formatter);
+
+    @Test
+    public void testFindDates() {
+        // Prepare test data
+        JSONObject inputJson = new JSONObject("{\"date1\": \"2024-01-28\", \"date2\": \"2024-01-30\"}");
+        JSONObject expectedOutputJson = new JSONObject("{\"date1\": 1, \"date2\": -1}");
+
+        // Call the method to test
+        JSONObject actualOutputJson = new JSONObject();
+        DateFinder.findDates(inputJson, actualOutputJson);
+
+        // Check the result
+        Assert.assertEquals(expectedOutputJson.toString(), actualOutputJson.toString());
+    }
+}
