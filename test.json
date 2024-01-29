@@ -1,1 +1,39 @@
-
+{
+  "_metadataBookingForm": "Notional",
+  "_metadataQuoteType": "Hybrid",
+  "_metadataSchemaType": "Autocall",
+  "_metadataType": "Payoff_Autocall_FixedCpn_KickIn_Note_1",
+  "_metadataVersion": "0.0",
+  "autoCallSizeManagement": true,
+  "autocall": {
+    "autoCallFrequency": "SemiAnnual",
+    "autoCallFromPeriod": 1,
+    "barrierLevel":{
+      "entityType": "FlatLevel",
+      "level": 1.02
+    }
+  },
+  "barrierSlide": -0.0075,
+  "barrierSmoothing": 8,
+  "barrierTouchOrCross": "Touch",
+  "entityType": "Autocall_UpAtHit_1",
+  "expiryCallable": true,
+  "memoryAutocall" : false,
+  "denominationCurrency" : "450 EUR",
+  "depository" : "CCONSOI/49314",
+  "displayRetroFee" : true,
+  "entityType" : "Payoff_Autocall_FixedCpn_KickIn_Note_1",
+  "expiryPayment":{
+     "barrierFrequency": "Continuous",
+     "barrierLevel": 0.75,
+     "barrierSlide": -0.075,
+     "barrierSmoothing": 8,
+     "barrierStartDate": "2024-01-29",
+     "barrierTouchOrCross": "Touch",
+     "entityType": "Payment_DownOneHit_KI_PutOptFwd",
+     "kickInCalculatedType": "AnyQm",
+     "kickInPaymentGearing": 1,
+     "kickInPaymentStrike": 1,
+     "KickinPaymentInstrument": "Put"
+  }
+}
