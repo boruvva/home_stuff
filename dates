@@ -1,0 +1,67 @@
+import org.json.*;
+import java.time.*;
+import java.time.format.*;
+import java.time.temporal.*;
+import java.io.*;
+
+public class DateFinder {
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static LocalDate referenceDate = LocalDate.parse("2024-01-29", formatter);
+
+    public static void main(String[] args) {
+        String jsonStr = readJsonFile("path_to_your_json_file");
+        JSONObject jsonObj = new JSONObject(jsonStr);
+        JSONObject result = new JSONObject();
+        findDates(jsonObj, result);
+        writeJsonFile("path_to_output_json_file", result.toString());
+    }
+
+    private static void findDates(JSONObject jsonObj, JSONObject result) {
+        for(String key : jsonObj.keySet()) {
+            Object value = jsonObj.get(key);
+            if(value instanceof JSONObject) {
+                JSONObject newResult = new JSONObject();
+                result.put(key, newResult);
+                findDates((JSONObject) value, newResult);
+            } else if(value instanceof JSONArray) {
+                JSONArray array = (JSONArray) value;
+                for(int i = 0; i < array.length(); i++) {
+                    if(array.get(i) instanceof JSONObject) {
+                        JSONObject newResult = new JSONObject();
+                        result.getJSONArray(key).put(newResult);
+                        findDates(array.getJSONObject(i), newResult);
+                    }
+                }
+            } else {
+                try {
+                    LocalDate date = LocalDate.parse(value.toString(), formatter);
+                    long diff = ChronoUnit.DAYS.between(referenceDate, date);
+                    result.put(key, diff);
+                } catch(DateTimeParseException e) {
+                    // Not a date
+                }
+            }
+        }
+    }
+
+    private static String readJsonFile(String filename) {
+        StringBuilder jsonStr = new StringBuilder();
+        try(BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while((line = br.readLine()) != null) {
+                jsonStr.append(line);
+            }
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+        return jsonStr.toString();
+    }
+
+    private static void writeJsonFile(String filename, String jsonStr) {
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+            bw.write(jsonStr);
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
