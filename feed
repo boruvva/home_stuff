@@ -1,0 +1,11 @@
+public Document getFeedsFromJson(JSONArray feeds, String feedType) { 
+  Document xmlDocument = null; 
+  for (int i = 0; i < feeds.length(); i++) { 
+    JSONObject feed = (JSONObject) feeds.get(i);
+    if (feed.get("feedType").equals(feedType)) { 
+      xmlDocument = getXmlDocument(feed.get("request").toString());
+      break; // retrieve most recent feed of the given type
+    } 
+  } 
+  return xmlDocument; 
+}
