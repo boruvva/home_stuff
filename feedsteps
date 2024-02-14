@@ -1,0 +1,14 @@
+public void L_check_latest_feeds_have_these_values_in_CPSS(String feedName, List<FieldValuePair> expectations) {
+    Optional<String> isin = cpssIsinIn_Context();
+    if (!isin.isPresent()) {
+        throw new NoSuchElementException("Isin must be present for requesting feeds");
+    }
+    try {
+        JSONArray feeds = cpssServer.getFeedsInCpss(isin.get()).getFeedsAsJSONArray();
+        Optional<Document> xmlDocument = cpssServer.getFeedsFromJson(feedName, feeds);
+        expectations.forEach(expectation -> assertThat(String.format("Feed field '%s' expected [ %s ]", expectation.field(), expectation.resolveValue().value()), 
+            cpssServer.getValueFromXmlDocument(xmlDocument.get(), expectation.field()), is(expectation.resolveValue().value())));
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to process feeds", e);
+    }
+}
