@@ -1,0 +1,49 @@
+import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class XmlUpdaterTest {
+
+    @Test
+    public void testSetValue() {
+        try {
+            // Create a temporary XML file for testing
+            File tempFile = File.createTempFile("test", ".xml");
+            tempFile.deleteOnExit();
+
+            // Initialize the XML document
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.newDocument();
+            Element rootElement = doc.createElement("data");
+            doc.appendChild(rootElement);
+
+            // Add a sample tag
+            Element startdateElement = doc.createElement("startdate");
+            rootElement.appendChild(startdateElement);
+
+            // Set the initial value
+            String initialValue = "2024-02-29";
+            startdateElement.appendChild(doc.createTextNode(initialValue));
+
+            // Update the value using the setValue method
+            String updatedValue = "2024-03-01";
+            XmlUpdater.setValue("startdate", rootElement, updatedValue);
+
+            // Verify that the value was updated correctly
+            String newValue = XmlUpdater.getValue("startdate", rootElement);
+            assertEquals(updatedValue, newValue);
+
+            // Clean up (delete the temporary file)
+            tempFile.delete();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+}
