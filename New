@@ -1,0 +1,24 @@
+private void verifyStompEntityState(StompEntityType stompEntityInQuestion, String expectedState, String entityKey) {
+    if (isNotBlank(expectedState)) {
+        final StopWatch watch = new StopWatch();
+        watch.start();
+        StateInStomp stateInStomp;
+        boolean isStateAsExpected = false;
+        do {
+            stateInStomp = stompOrderServices.getLatestState(stompEntityInQuestion, entityKey);
+            isStateAsExpected = stateInStomp.getState().equalsIgnoreCase(expectedState);
+            if (isStateAsExpected) {
+                break; // Exit loop if the expected state is achieved
+            }
+            try {
+                Thread.sleep(3000); // Wait for 3 seconds before checking again
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // Restore interrupted status
+                throw new IllegalStateException("Thread interrupted", e);
+            }
+        } while (watch.getTime() < 10000); // Timeout after 10 seconds
+        watch.stop();
+        log.info("Retrieved State for - " + stompEntityInQuestion + " : " + entityKey + " from Stomp in " + watch.getTime() + " ms");
+        assertThat(String.format("State of the %s in Stomp", stompEntityInQuestion), stateInStomp.getState(), is(expectedState));
+    }
+}
