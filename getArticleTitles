@@ -1,0 +1,88 @@
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
+
+
+class Result {
+    public static List<String> getArticleTitles(String author) throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+        Gson gson = new Gson();
+        List<String> titles = new ArrayList<>();
+        int pageNum = 1;
+
+        while (true) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("https://jsonmock.hackerrank.com/api/articles?author=" + author + "&page=" + pageNum))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                System.out.println("Failed to get page " + pageNum + ". Status code: " + response.statusCode());
+                break;
+            }
+
+            JsonObject data = gson.fromJson(response.body(), JsonObject.class);
+            JsonArray articles = data.getAsJsonArray("data");
+
+            for (JsonElement article : articles) {
+                JsonObject articleObj = article.getAsJsonObject();
+                String title = articleObj.get("title").isJsonNull() ? null : articleObj.get("title").getAsString();
+                String storyTitle = articleObj.get("story_title").isJsonNull() ? null : articleObj.get("story_title").getAsString();
+
+                if (title != null) {
+                    titles.add(title);
+                } else if (storyTitle != null) {
+                    titles.add(storyTitle);
+                }
+            }
+
+            if (pageNum >= data.get("total_pages").getAsInt()) {
+                break;
+            }
+
+            pageNum++;
+        }
+
+        return titles;
+    }
+}
+
+
+public class Solution {
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(System.getenv("OUTPUT_PATH")));
+
+        String author = bufferedReader.readLine();
+
+        List<String> result;
+        try {
+            result = Result.getArticleTitles(author);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        bufferedWriter.write(
+            result.stream()
+                .collect(Collectors.joining("\n"))
+            + "\n"
+        );
+
+        bufferedReader.close();
+        bufferedWriter.close();
+    }
+}
