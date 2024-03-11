@@ -1,0 +1,33 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+// Assuming the existence of a function that sends packets and returns the number of times sent
+extern int sendPackets(int numberOfPorts, int transmissionTime, int* packetIds, int packetCount);
+
+int* sentTimes(int numberOfPorts, int transmissionTime, int* packetIds, int packetCount) {
+    // Allocate memory for the results array
+    int* timesSent = malloc(packetCount * sizeof(int));
+    if (timesSent == NULL) {
+        // Handle memory allocation failure
+        fprintf(stderr, "Memory allocation failed\n");
+        return NULL;
+    }
+
+    // Call the external function to send packets and store the result
+    for (int i = 0; i < packetCount; ++i) {
+        timesSent[i] = sendPackets(numberOfPorts, transmissionTime, &packetIds[i], 1);
+    }
+
+    // Return the array of times each packet was sent
+    return timesSent;
+}
+
+// Example usage:
+// int packetIds[] = {101, 202, 303}; // Example packet IDs
+// int* results = sentTimes(5, 100, packetIds, 3);
+// if (results != NULL) {
+//     for (int i = 0; i < 3; ++i) {
+//         printf("Packet ID %d sent %d times\n", packetIds[i], results[i]);
+//     }
+//     free(results); // Remember to free the memory allocated for results
+// }
