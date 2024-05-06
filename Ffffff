@@ -1,3 +1,59 @@
 while IFS=. read -r name ext; do 
     echo "$name.$ext" >> "${name}_${ext}_file_00.txt"
 done < baseFilename 
+#!/bin/bash
+
+# Function to check if a string is an extension
+is_extension() {
+  local ext="$1"
+  [[ "$ext" == .* ]]
+}
+
+# Check if an input file was provided
+if [[ $# -lt 1 ]]; then
+    echo "Usage: $0 <baseFilename> [<extension1> <extension2> ...]"
+    exit 1
+fi
+
+base_filename=$1
+
+# Get extensions from command line arguments (if provided)
+extensions=()
+for arg in "${@:2}"; do
+  if is_extension "$arg"; then
+    extensions+=("$arg")
+  else
+    echo "Error: Invalid extension '$arg'"
+    exit 1
+  fi
+done
+
+# If no extensions provided, use defaults
+if [[ ${#extensions[@]} -eq 0 ]]; then
+  extensions=(".c" ".cpp" ".cs")
+fi
+
+# Error handling for input file
+if [[ ! -f "$base_filename" ]]; then
+    echo "Error: Input file '$base_filename' does not exist."
+    exit 1
+fi
+
+# Process each filename in the input file
+counter=0
+while IFS= read -r filename; do
+    file_matched=false
+
+    for ext in "${extensions[@]}"; do
+        if [[ "$filename" == *$ext ]]; then
+            echo "$filename" >> "${base_filename}_${ext:1}_file_$((counter++)).txt"
+            file_matched=true
+            break  # Exit the inner loop if a match is found
+        fi
+    done
+
+    # If no extension matched, provide a notification (optional)
+    if ! $file_matched; then
+        echo "Warning: No matching extension found for '$filename'"
+    fi
+done < "$base_filename" 
