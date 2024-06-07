@@ -1,0 +1,16 @@
+Product(ProductInStomp.class) {
+        public String sniffKeyFrom(BookingIdentifiers bookingIdentifiers) {
+            int attempts = 0;
+            while (attempts < 3) { // Retry up to 3 times
+                try {
+                    return bookingIdentifiers.getProductKey();
+                } catch (Exception e) {
+                    attempts++;
+                    if (attempts >= 3) {
+                        throw e; // Rethrow the exception after 3 attempts
+                    }
+                }
+            }
+            throw new AppException("Unable to retrieve product key after 3 attempts");
+        }
+        public String sniffState(JSONObject jsonObject) {
