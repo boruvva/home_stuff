@@ -1,0 +1,28 @@
+@Then("^In Stomp RMP I (again see|see) the Product with the following values:$")
+public void In_Stomp_RMP_I_see_the_Product_with_the_following_values(String again, List<FieldValuePair> expectations) {
+    final ProductInStompRmp productInStompRmp = stompRMPProductInContext(again.trim().equalsIgnoreCase("again see"));
+    long startTime = System.currentTimeMillis();
+    long timeoutMillis = 5000; // Set your desired timeout in milliseconds
+
+    while (System.currentTimeMillis() - startTime < timeoutMillis) {
+        boolean allValuesMatch = true;
+        for (FieldValuePair expectation : expectations) {
+            String valueField = productInStompRmp.getErrorSafeValueByField(expectation.field);
+            String expectedValue = expectation.resolveValue().value;
+            expectedValue = (expectedValue.equals("null") ? null : expectedValue);
+            if (!Objects.equals(valueField, expectedValue)) {
+                allValuesMatch = false;
+                break;
+            }
+        }
+        if (allValuesMatch) {
+            // All expected values match, exit the loop
+            break;
+        }
+        // Sleep for a short interval before checking again
+        try {
+            Thread.sleep(100); // Adjust the sleep interval as needed
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
