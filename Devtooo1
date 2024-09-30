@@ -13,31 +13,30 @@ is_text_file() {
     file --mime "$1" | grep -q 'charset=us-ascii\|charset=utf-8'
 }
 
-# Run tests
-echo "Running tests..."
+# Run tests and compare with expected results
+run_test() {
+    local test_name=$1
+    local fileA=$2
+    local fileB=$3
+    local expected_output=$4
 
-# Test 1: Identical text files
-./compare_files.sh file1.txt file3.txt
-# Expected output: "Files are identical"
+    echo "Running $test_name..."
+    actual_output=$(./compare_files.sh "$fileA" "$fileB")
+    if [ "$actual_output" == "$expected_output" ]; then
+        echo "$test_name passed."
+    else
+        echo "$test_name failed."
+        echo "Expected: $expected_output"
+        echo "Got: $actual_output"
+    fi
+}
 
-# Test 2: Different text files
-./compare_files.sh file1.txt file2.txt
-# Expected output: "Files are different"
+# Test cases
+run_test "Test 1: Identical text files" file1.txt file3.txt "Files are identical"
+run_test "Test 2: Different text files" file1.txt file2.txt "Files are different"
+run_test "Test 3: Identical binary files" file1.bin file3.bin "Files are identical"
+run_test "Test 4: Different binary files" file1.bin file2.bin "Files are different"
+run_test "Test 5: Text file vs Binary file" file1.txt file1.bin "Files are different"
+run_test "Test 6: At least one file is text" file1.txt file2.bin "Files are different"
 
-# Test 3: Identical binary files
-./compare_files.sh file1.bin file3.bin
-# Expected output: "Files are identical"
-
-# Test 4: Different binary files
-./compare_files.sh file1.bin file2.bin
-# Expected output: "Files are different"
-
-# Test 5: Text file vs Binary file
-./compare_files.sh file1.txt file1.bin
-# Expected output: "Files are different"
-
-# Test 6: At least one file is text
-./compare_files.sh file1.txt file2.bin
-# Expected output: "Files are different"
-
-echo "Tests completed."
+echo "All tests completed."
