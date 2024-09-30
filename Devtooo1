@@ -1,42 +1,42 @@
 #!/bin/bash
 
-# Create test files
-echo "Hello World" > file1.txt
-echo "Hello Universe" > file2.txt
-echo "Hello World" > file3.txt
-echo -n -e '\x00\x01\x02\x03' > file1.bin
-echo -n -e '\x04\x05\x06\x07' > file2.bin
-echo -n -e '\x00\x01\x02\x03' > file3.bin
+# Create test directories and files
+mkdir -p test_dir/small_dir
+mkdir -p test_dir/medium_dir
+mkdir -p test_dir/large_dir
 
-# Function to check if a file is a text file
-is_text_file() {
-    file --mime "$1" | grep -q 'charset=us-ascii\|charset=utf-8'
-}
+# Create files of different sizes
+dd if=/dev/zero of=test_dir/small_dir/file1 bs=1K count=1
+dd if=/dev/zero of=test_dir/medium_dir/file2 bs=1M count=1
+dd if=/dev/zero of=test_dir/large_dir/file3 bs=10M count=1
 
-# Run tests and compare with expected results
+# Run the script and capture the output
 run_test() {
-    local test_name=$1
-    local fileA=$2
-    local fileB=$3
-    local expected_output=$4
+    local min_size=$1
+    local expected_output=$2
 
-    echo "Running $test_name..."
-    actual_output=$(./compare_files.sh "$fileA" "$fileB")
+    echo "Running test with min_size=$min_size..."
+    actual_output=$(./your_script.sh "$min_size" test_dir)
     if [ "$actual_output" == "$expected_output" ]; then
-        echo "$test_name passed."
+        echo "Test passed."
     else
-        echo "$test_name failed."
+        echo "Test failed."
         echo "Expected: $expected_output"
         echo "Got: $actual_output"
     fi
 }
 
-# Test cases
-run_test "Test 1: Identical text files" file1.txt file3.txt "Files are identical"
-run_test "Test 2: Different text files" file1.txt file2.txt "Files are different"
-run_test "Test 3: Identical binary files" file1.bin file3.bin "Files are identical"
-run_test "Test 4: Different binary files" file1.bin file2.bin "Files are different"
-run_test "Test 5: Text file vs Binary file" file1.txt file1.bin "Files are different"
-run_test "Test 6: At least one file is text" file1.txt file2.bin "Files are different"
+# Expected outputs
+expected_output_0M="10M\ttest_dir/large_dir\n1M\ttest_dir/medium_dir\n4.0K\ttest_dir/small_dir"
+expected_output_1M="10M\ttest_dir/large_dir\n1M\ttest_dir/medium_dir"
+expected_output_10M="10M\ttest_dir/large_dir"
 
-echo "All tests completed."
+# Run tests
+run_test "0M" "$expected_output_0M"
+run_test "1M" "$expected_output_1M"
+run_test "10M" "$expected_output_10M"
+
+# Clean up test directories and files
+rm -rf test_dir
+
+echo "All tests completed and test files removed."
