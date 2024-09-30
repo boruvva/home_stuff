@@ -1,36 +1,43 @@
 #!/bin/bash
 
-# Test case: Create a test file with some content
-test_file="test_file.txt"
-echo -e "apple\nbanana\ncherry" > "$test_file"
+# Create test files
+echo "Hello World" > file1.txt
+echo "Hello Universe" > file2.txt
+echo "Hello World" > file3.txt
+echo -n -e '\x00\x01\x02\x03' > file1.bin
+echo -n -e '\x04\x05\x06\x07' > file2.bin
+echo -n -e '\x00\x01\x02\x03' > file3.bin
 
-# Run the script with test cases and capture the output
-test_output=$(./your_script.sh "$test_file" << EOF
-apple
-grape
-banana
-EOF
-)
+# Function to check if a file is a text file
+is_text_file() {
+    file --mime "$1" | grep -q 'charset=us-ascii\|charset=utf-8'
+}
 
-# Expected output
-expected_output=$(cat <<EOF
-declare -a array=([0]="apple" [1]="grape" [2]="banana")
-apple found
-grape not found
-banana found
-EOF
-)
+# Run tests
+echo "Running tests..."
 
-# Check if the output matches the expected output
-if [[ "$test_output" == "$expected_output" ]]; then
-    echo "Test passed!"
-else
-    echo "Test failed!"
-    echo "Expected:"
-    echo "$expected_output"
-    echo "Got:"
-    echo "$test_output"
-fi
+# Test 1: Identical text files
+./compare_files.sh file1.txt file3.txt
+# Expected output: "Files are identical"
 
-# Cleanup
-rm "$test_file"
+# Test 2: Different text files
+./compare_files.sh file1.txt file2.txt
+# Expected output: "Files are different"
+
+# Test 3: Identical binary files
+./compare_files.sh file1.bin file3.bin
+# Expected output: "Files are identical"
+
+# Test 4: Different binary files
+./compare_files.sh file1.bin file2.bin
+# Expected output: "Files are different"
+
+# Test 5: Text file vs Binary file
+./compare_files.sh file1.txt file1.bin
+# Expected output: "Files are different"
+
+# Test 6: At least one file is text
+./compare_files.sh file1.txt file2.bin
+# Expected output: "Files are different"
+
+echo "Tests completed."
