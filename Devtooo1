@@ -14,7 +14,32 @@ dd if=/dev/zero of=test_dir/large_dir/file3 bs=10M count=1
 run_test() {
     local min_size=$1
     local expected_output=$2
+Ah, you're seeing the same sizes but still failing the tests. Here's the scoop:
 
+When comparing outputs in scripts, even minor differences in formatting, such as extra spaces or newlines, can trip up the test. Also, make sure there are no hidden characters in your expected strings.
+
+Let's update your script to strip whitespaces and newlines before comparison:
+
+```bash
+run_test() {
+    local min_size=$1
+    local expected_output=$2
+
+    echo "Running test with min_size=$min_size..."
+    actual_output=$(./GetDirectorySizes.sh $min_size | tr -d '\n' | tr -s ' ')
+    expected_output=$(echo -e "$expected_output" | tr -d '\n' | tr -s ' ')
+
+    if [ "$actual_output" == "$expected_output" ]; then
+        echo "Test passed."
+    else
+        echo "Test failed."
+        echo "Expected: $expected_output"
+        echo "Got: $actual_output"
+    fi
+}
+```
+
+Give this a try and see if it smooths out the rough patches.
     echo "Running test with min_size=$min_size..."
     actual_output=$(./your_script.sh "$min_size" test_dir)
     if [ "$actual_output" == "$expected_output" ]; then
