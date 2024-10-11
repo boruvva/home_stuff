@@ -13,15 +13,4 @@ if ! [[ "$1" =~ ^[0-9]+$ ]]; then
 fi
 
 # Set the current directory
-current_dir=$(pwd)
-
-# Loop to go up the specified number of levels
-for ((i=0; i<$1; i++)); do
-  current_dir=$(dirname "$current_dir")
-done
-
-# Change to the new directory
-cd "$current_dir" || { echo "Failed to change directory"; exit 1; }
-
-# Print the new directory
-echo "$current_dir"
+current_dir=$(pwd
