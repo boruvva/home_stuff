@@ -1,25 +1,42 @@
 #!/bin/bash
 
-# Test script for split_files.sh
+# Function to create test files
+create_test_files() {
+    mkdir -p test_dir
+    dd if=/dev/zero of=test_dir/testfile1GB bs=1M count=1024
+    dd if=/dev/zero of=test_dir/testfile100MB bs=1M count=100
+}
 
-# Create test files for splitting
-echo "This is a test file for splitting." > testfile1.txt
-echo "This file has some more content for testing splitting." > testfile2.txt
+# Function to run a test case
+run_test() {
+    local filename=$1
+    local size=$2
+    local expected_output=$3
 
-# Run the split_files.sh script for different test cases
+    echo "Running test for file '$filename' with size '$size'..."
+    actual_output=$(../split-files.sh test_dir/$filename $size 2>&1)
+    if [ "$actual_output" == "$expected_output" ]; then
+        echo "Test passed."
+    else
+        echo "Test failed."
+        echo "Expected: $expected_output"
+        echo "Got: $actual_output"
+    fi
+}
 
-# Test 1: Split with default size
-echo "Running Test 1: Splitting testfile1.txt with default size"
-bash split_files.sh testfile1.txt
+# Create test files
+create_test_files
 
-# Test 2: Split with specified size
-echo "Running Test 2: Splitting testfile2.txt with size 100 bytes"
-bash split_files.sh testfile2.txt 100
+# Expected outputs
+expected_output_1="I am checking file test_dir/testfile1GB"
+expected_output_2="I am checking file test_dir/testfile100MB"
+expected_output_3="Can't find input file. Please provide filename"
 
-# Test 3: Missing input file
-echo "Running Test 3: Trying to split a non-existent file"
-bash split_files.sh non_existent_file.txt
+# Run tests
+run_test "testfile1GB" "" "$expected_output_1"
+run_test "testfile100MB" "" "$expected_output_2"
+run_test "non_existent_file" "" "$expected_output_3"
 
-# Check if files were split correctly
-echo "Test files after split:"
-ls -l testfile1_part* testfile2_part*
+# Clean up test files and directories
+rm -rf test_dir
+echo "All tests completed and test files removed."
