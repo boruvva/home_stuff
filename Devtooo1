@@ -1,12 +1,17 @@
 #!/bin/bash
 
-# Function to run a test case
+# Create temporary directory and files for testing
+mkdir -p test_dir
+echo "Hello World" > test_dir/testfile1.txt
+echo "Goodbye World" > test_dir/testfile2.txt
+
+# Test function to run search script and compare output
 run_test() {
-    local min_size=$1
+    local search_string=$1
     local expected_output=$2
 
-    echo "Running test with min_size=$min_size..."
-    actual_output=$(./GetDirectorySizes.sh $min_size)
+    echo "Running test for string '$search_string'..."
+    actual_output=$(./search_script.sh test_dir "$search_string")
     if [ "$actual_output" == "$expected_output" ]; then
         echo "Test passed."
     else
@@ -16,24 +21,15 @@ run_test() {
     fi
 }
 
-# Test setup
-mkdir -p small_dir
-mkdir -p medium_dir
-mkdir -p large_dir
-dd if=/dev/zero of=small_dir/file1 bs=1M count=1
-dd if=/dev/zero of=medium_dir/file2 bs=1M count=5
-dd if=/dev/zero of=large_dir/file3 bs=1M count=10
+# Test cases
+expected_output_hello="test_dir/testfile1.txt:Hello World"
+expected_output_goodbye="test_dir/testfile2.txt:Goodbye World"
+expected_output_not_found=""
 
-# Expected outputs
-expected_output_0M="10M ./large_dir/\n5.0M ./medium_dir/\n1.0M ./small_dir/"
-expected_output_1M="10M ./large_dir/\n5.0M ./medium_dir/"
-expected_output_10M="10M ./large_dir/"
+run_test "Hello" "$expected_output_hello"
+run_test "Goodbye" "$expected_output_goodbye"
+run_test "NotFound" "$expected_output_not_found"
 
-# Run tests
-run_test "0M" "$expected_output_0M"
-run_test "1M" "$expected_output_1M"
-run_test "10M" "$expected_output_10M"
-
-# Clean up
-rm -rf large_dir small_dir medium_dir
+# Clean up test files and directories
+rm -rf test_dir
 echo "All tests completed and test files removed."
