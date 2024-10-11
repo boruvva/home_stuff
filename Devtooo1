@@ -6,6 +6,12 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+# Check if the provided argument is a number
+if ! [[ "$1" =~ ^[0-9]+$ ]]; then
+  echo "Error: Argument is not a number. Please provide a valid number of levels."
+  exit 1
+fi
+
 # Set the current directory
 current_dir=$(pwd)
 
