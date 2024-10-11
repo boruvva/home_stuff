@@ -1,34 +1,12 @@
 #!/bin/bash
 
-# Create test directories and files
-mkdir -p test_dir/small_dir
-mkdir -p test_dir/medium_dir
-mkdir -p test_dir/large_dir
-
-# Create files of different sizes
-dd if=/dev/zero of=test_dir/small_dir/file1 bs=1K count=1
-dd if=/dev/zero of=test_dir/medium_dir/file2 bs=1M count=1
-dd if=/dev/zero of=test_dir/large_dir/file3 bs=10M count=1
-
-# Run the script and capture the output
-run_test() {
-    local min_size=$1
-    local expected_output=$2
-Ah, you're seeing the same sizes but still failing the tests. Here's the scoop:
-
-When comparing outputs in scripts, even minor differences in formatting, such as extra spaces or newlines, can trip up the test. Also, make sure there are no hidden characters in your expected strings.
-
-Let's update your script to strip whitespaces and newlines before comparison:
-
-```bash
+# Function to run a test case
 run_test() {
     local min_size=$1
     local expected_output=$2
 
     echo "Running test with min_size=$min_size..."
-    actual_output=$(./GetDirectorySizes.sh $min_size | tr -d '\n' | tr -s ' ')
-    expected_output=$(echo -e "$expected_output" | tr -d '\n' | tr -s ' ')
-
+    actual_output=$(./GetDirectorySizes.sh $min_size)
     if [ "$actual_output" == "$expected_output" ]; then
         echo "Test passed."
     else
@@ -37,31 +15,25 @@ run_test() {
         echo "Got: $actual_output"
     fi
 }
-```
 
-Give this a try and see if it smooths out the rough patches.
-    echo "Running test with min_size=$min_size..."
-    actual_output=$(./your_script.sh "$min_size" test_dir)
-    if [ "$actual_output" == "$expected_output" ]; then
-        echo "Test passed."
-    else
-        echo "Test failed."
-        echo "Expected: $expected_output"
-        echo "Got: $actual_output"
-    fi
-}
+# Test setup
+mkdir -p small_dir
+mkdir -p medium_dir
+mkdir -p large_dir
+dd if=/dev/zero of=small_dir/file1 bs=1M count=1
+dd if=/dev/zero of=medium_dir/file2 bs=1M count=5
+dd if=/dev/zero of=large_dir/file3 bs=1M count=10
 
 # Expected outputs
-expected_output_0M="10M\ttest_dir/large_dir\n1M\ttest_dir/medium_dir\n4.0K\ttest_dir/small_dir"
-expected_output_1M="10M\ttest_dir/large_dir\n1M\ttest_dir/medium_dir"
-expected_output_10M="10M\ttest_dir/large_dir"
+expected_output_0M="10M ./large_dir/\n5.0M ./medium_dir/\n1.0M ./small_dir/"
+expected_output_1M="10M ./large_dir/\n5.0M ./medium_dir/"
+expected_output_10M="10M ./large_dir/"
 
 # Run tests
 run_test "0M" "$expected_output_0M"
 run_test "1M" "$expected_output_1M"
 run_test "10M" "$expected_output_10M"
 
-# Clean up test directories and files
-rm -rf test_dir
-
+# Clean up
+rm -rf large_dir small_dir medium_dir
 echo "All tests completed and test files removed."
