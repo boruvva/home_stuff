@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Check if the number of levels to go up is provided
-if [ -z "$1" ]; then
-  echo "Usage: $0 <number_of_levels>"
-  exit 1
-fi
+# Function to move up in the directory path
+up() {
+  local levels=$1
+  while [[ $levels -gt 0 ]]; do
+    cd ..
+    levels=$((levels - 1))
+  done
+}
 
-# Check if the provided argument is a number
-if ! [[ "$1" =~ ^[0-9]+$ ]]; then
-  echo "Error: Argument is not a number. Please provide a valid number of levels."
-  exit 1
-fi
+# Get the current working directory
+pwd
 
-# Set the current directory
-current_dir=$(pwd
+# Example usage: Move up two levels
+up 2
