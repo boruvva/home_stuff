@@ -1,20 +1,5 @@
 #!/bin/bash
 
-# Main script function
-transform_file() {
-    file=$1
-    output="output_${file}"
-
-    if [[ -n "${file}" ]]; then
-        echo "I am checking file: ${file}"
-        while read -r line; do
-            echo "'$line'," >> ${output}
-        done < "${file}"
-    else
-        echo "Can't find input file. Please provide filename"
-    fi
-}
-
 # Function to create a test input file
 create_test_file() {
     input_file="test_input.txt"
@@ -27,7 +12,7 @@ run_test() {
     local expected_output=$2
 
     echo "Running test for file '$filename'..."
-    transform_file ${filename}
+    ./transform_script.sh ${filename}
 
     # Verify the output
     output_file="output_${filename}"
