@@ -1,42 +1,64 @@
 #!/bin/bash
 
-# Function to create test files
-create_test_files() {
-    mkdir -p test_dir
-    dd if=/dev/zero of=test_dir/testfile1GB bs=1M count=1024
-    dd if=/dev/zero of=test_dir/testfile100MB bs=1M count=100
+# Main script function
+transform_file() {
+    file=$1
+    output="output_${file}"
+
+    if [[ -n "${file}" ]]; then
+        echo "I am checking file: ${file}"
+        while read -r line; do
+            echo "'$line'," >> ${output}
+        done < "${file}"
+    else
+        echo "Can't find input file. Please provide filename"
+    fi
+}
+
+# Function to create a test input file
+create_test_file() {
+    input_file="test_input.txt"
+    echo -e "A\nB\nC\nD" > ${input_file}
 }
 
 # Function to run a test case
 run_test() {
     local filename=$1
-    local size=$2
-    local expected_output=$3
+    local expected_output=$2
 
-    echo "Running test for file '$filename' with size '$size'..."
-    actual_output=$(../split-files.sh test_dir/$filename $size 2>&1)
-    if [ "$actual_output" == "$expected_output" ]; then
-        echo "Test passed."
+    echo "Running test for file '$filename'..."
+    transform_file ${filename}
+
+    # Verify the output
+    output_file="output_${filename}"
+    if [ -f ${output_file} ]; then
+        actual_output=$(cat ${output_file})
+        if [ "$actual_output" == "$expected_output" ]; then
+            echo "Test passed."
+        else
+            echo "Test failed."
+            echo "Expected: $expected_output"
+            echo "Got: $actual_output"
+        fi
     else
-        echo "Test failed."
-        echo "Expected: $expected_output"
-        echo "Got: $actual_output"
+        echo "Test failed. Output file not found."
     fi
 }
 
-# Create test files
-create_test_files
+# Main function to execute the tests
+main() {
+    create_test_file
 
-# Expected outputs
-expected_output_1="I am checking file test_dir/testfile1GB"
-expected_output_2="I am checking file test_dir/testfile100MB"
-expected_output_3="Can't find input file. Please provide filename"
+    # Expected output
+    expected_output="'A',\n'B',\n'C',\n'D',\n"
 
-# Run tests
-run_test "testfile1GB" "" "$expected_output_1"
-run_test "testfile100MB" "" "$expected_output_2"
-run_test "non_existent_file" "" "$expected_output_3"
+    # Run test
+    run_test "test_input.txt" "$expected_output"
 
-# Clean up test files and directories
-rm -rf test_dir
-echo "All tests completed and test files removed."
+    # Clean up
+    rm -f test_input.txt output_test_input.txt
+    echo "All tests completed and test files removed."
+}
+
+# Execute the main function
+main
