@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if the number of levels to go up is provided
 if [ -z "$1" ]; then
   echo "Usage: $0 <number_of_levels>"
