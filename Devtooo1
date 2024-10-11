@@ -1,35 +1,43 @@
 #!/bin/bash
 
-# Create temporary directory and files for testing
-mkdir -p test_dir
-echo "Hello World" > test_dir/testfile1.txt
-echo "Goodbye World" > test_dir/testfile2.txt
+# Test script for split_files.sh
 
-# Test function to run search script and compare output
-run_test() {
-    local search_string=$1
-    local expected_output=$2
+# Create a temporary directory for testing
+TEST_DIR=$(mktemp -d)
+cd $TEST_DIR || exit 1
 
-    echo "Running test for string '$search_string'..."
-    actual_output=$(./search_script.sh test_dir "$search_string")
-    if [ "$actual_output" == "$expected_output" ]; then
-        echo "Test passed."
-    else
-        echo "Test failed."
-        echo "Expected: $expected_output"
-        echo "Got: $actual_output"
-    fi
-}
+# Create a sample file for testing
+echo "This is a test file." > testfile.txt
 
-# Test cases
-expected_output_hello="test_dir/testfile1.txt:Hello World"
-expected_output_goodbye="test_dir/testfile2.txt:Goodbye World"
-expected_output_not_found=""
+# Test 1: Valid file input
+echo "Running Test 1: Valid file input"
+../split_files.sh testfile.txt
+if [ -f "testfile.txt.partaa" ]; then
+    echo "Test 1 Passed: File was split successfully."
+else
+    echo "Test 1 Failed: File was not split."
+fi
 
-run_test "Hello" "$expected_output_hello"
-run_test "Goodbye" "$expected_output_goodbye"
-run_test "NotFound" "$expected_output_not_found"
+# Test 2: Invalid file input
+echo "Running Test 2: Invalid file input"
+../split_files.sh non_existent_file.txt
+if [ $? -eq 1 ]; then
+    echo "Test 2 Passed: Correctly handled non-existent file."
+else
+    echo "Test 2 Failed: Did not handle non-existent file correctly."
+fi
 
-# Clean up test files and directories
-rm -rf test_dir
+# Test 3: No file input
+echo "Running Test 3: No file input"
+../split_files.sh
+if [ $? -eq 1 ]; then
+    echo "Test 3 Passed: Correctly handled no input file."
+else
+    echo "Test 3 Failed: Did not handle no input file correctly."
+fi
+
+# Clean up
+cd ..
+rm -rf $TEST_DIR
+
 echo "All tests completed and test files removed."
