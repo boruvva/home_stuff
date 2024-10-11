@@ -1,49 +1,21 @@
 #!/bin/bash
 
-# Function to create a test input file
-create_test_file() {
-    input_file="test_input.txt"
-    echo -e "A\nB\nC\nD" > ${input_file}
-}
+# Check if the number of levels to go up is provided
+if [ -z "$1" ]; then
+  echo "Usage: up <number_of_levels>"
+  exit 1
+fi
 
-# Function to run a test case
-run_test() {
-    local filename=$1
-    local expected_output=$2
+# Get the current directory
+current_dir=$(pwd)
 
-    echo "Running test for file '$filename'..."
-    ./transform_script.sh ${filename}
+# Loop to go up the specified number of levels
+for ((i=0; i<$1; i++)); do
+  current_dir=$(dirname "$current_dir")
+done
 
-    # Verify the output
-    output_file="output_${filename}"
-    if [ -f ${output_file} ]; then
-        actual_output=$(cat ${output_file})
-        if [ "$actual_output" == "$expected_output" ]; then
-            echo "Test passed."
-        else
-            echo "Test failed."
-            echo "Expected: $expected_output"
-            echo "Got: $actual_output"
-        fi
-    else
-        echo "Test failed. Output file not found."
-    fi
-}
+# Change to the new directory
+cd "$current_dir"
 
-# Main function to execute the tests
-main() {
-    create_test_file
-
-    # Expected output
-    expected_output="'A',\n'B',\n'C',\n'D',\n"
-
-    # Run test
-    run_test "test_input.txt" "$expected_output"
-
-    # Clean up
-    rm -f test_input.txt output_test_input.txt
-    echo "All tests completed and test files removed."
-}
-
-# Execute the main function
-main
+# Print the new directory
+pwd
