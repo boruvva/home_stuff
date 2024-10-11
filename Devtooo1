@@ -1,12 +1,11 @@
 #!/bin/bash
-
 # Check if the number of levels to go up is provided
 if [ -z "$1" ]; then
-  echo "Usage: up <number_of_levels>"
+  echo "Usage: $0 <number_of_levels>"
   exit 1
 fi
 
-# Get the current directory
+# Set the current directory
 current_dir=$(pwd)
 
 # Loop to go up the specified number of levels
@@ -15,7 +14,7 @@ for ((i=0; i<$1; i++)); do
 done
 
 # Change to the new directory
-cd "$current_dir"
+cd "$current_dir" || { echo "Failed to change directory"; exit 1; }
 
 # Print the new directory
-pwd
+echo "$current_dir"
