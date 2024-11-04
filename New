@@ -1,24 +1,13 @@
-private void verifyStompEntityState(StompEntityType stompEntityInQuestion, String expectedState, String entityKey) {
-    if (isNotBlank(expectedState)) {
-        final StopWatch watch = new StopWatch();
-        watch.start();
-        StateInStomp stateInStomp;
-        boolean isStateAsExpected = false;
-        do {
-            stateInStomp = stompOrderServices.getLatestState(stompEntityInQuestion, entityKey);
-            isStateAsExpected = stateInStomp.getState().equalsIgnoreCase(expectedState);
-            if (isStateAsExpected) {
-                break; // Exit loop if the expected state is achieved
-            }
-            try {
-                Thread.sleep(3000); // Wait for 3 seconds before checking again
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // Restore interrupted status
-                throw new IllegalStateException("Thread interrupted", e);
-            }
-        } while (watch.getTime() < 10000); // Timeout after 10 seconds
-        watch.stop();
-        log.info("Retrieved State for - " + stompEntityInQuestion + " : " + entityKey + " from Stomp in " + watch.getTime() + " ms");
-        assertThat(String.format("State of the %s in Stomp", stompEntityInQuestion), stateInStomp.getState(), is(expectedState));
-    }
-}
+Driving Automation:
+By helping Mr. Trajdos accelerate automation, you're playing a crucial role in enhancing the efficiency and productivity of your projects. Automation reduces the time spent on repetitive tasks, minimizes errors, and ensures consistent output. Your efforts in this area not only optimize workflows but also free up team members to focus on more strategic and creative tasks. This ability to streamline processes and introduce innovative automation solutions is invaluable.
+
+Innersource Project Participation:
+Participating in an innersource project demonstrates your commitment to collaboration and knowledge sharing. Innersource practices involve applying open-source methodologies within an organization, encouraging a culture of transparency, inclusivity, and cross-team collaboration. By engaging in such projects, you're helping to:
+
+Foster a collaborative environment: Encouraging teamwork across different departments and breaking down silos.
+
+Leverage collective expertise: Tapping into the diverse skill sets and experiences of colleagues to create robust and innovative solutions.
+
+Improve code quality: Through peer reviews and shared best practices, ensuring high standards and reducing technical debt.
+
+Accelerate development: By reusing and contributing to shared codebases, speeding up the development process and reducing redundant work.
