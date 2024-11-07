@@ -1,11 +1,4 @@
-public static String gameWinner(String colors) {
-    int minSeen = colors.charAt(0); 
-    int maxDiff = -1;
-
-    for (int i = 1; i < colors.length(); i++) {
-        maxDiff = Math.max(maxDiff, colors.charAt(i) - minSeen); 
-        minSeen = Math.min(minSeen, colors.charAt(i));
-    }
-
-    return (maxDiff == -1) ? "wendy" : "bob"; // Assuming if no moves are possible, Wendy wins
-}
+Strengths Demonstrated:**
+1. **Engagement in Community Events**: Participated actively in the TechWeek event, showcasing a commitment to staying updated with technological advancements and networking with industry peers.
+2. **Support for Inclusivity and Diversity**: Involvement in charity work, such as participating in the LGBT march, demonstrates a strong support for inclusivity, diversity, and social responsibility.
+3. **Team Collaboration**: Worked collaboratively during events and projects, fostering a team-oriented environment and encouraging open communication.
