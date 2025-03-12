@@ -1,0 +1,24 @@
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.Vector;
+
+// ... other imports ...
+
+@Override
+public Enumeration<URL> getResources(String packageName) throws IOException {
+    ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(resourceLoader);
+    String path = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + packageName.replace('.', '/') + "/**/*"; // Load all resources in the package
+
+    Resource[] resources = resolver.getResources(path);
+
+    Vector<URL> urls = new Vector<>();
+    for (Resource resource : resources) {
+        urls.add(resource.getURL());
+    }
+    return urls.elements();
+}
